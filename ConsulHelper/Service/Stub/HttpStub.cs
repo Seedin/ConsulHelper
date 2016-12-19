@@ -17,17 +17,43 @@ namespace BitAuto.Ucar.Utils.Common.Service.Stub
     public class HttpStub
     {
         /// <summary>
+        /// 参数类型
+        /// </summary>
+        public enum ParaMode
+        {
+            /// <summary>
+            /// URL参数
+            /// </summary>
+            UrlPara,
+            /// <summary>
+            /// Form表单参数
+            /// </summary>
+            FormPara,
+            /// <summary>
+            /// Json直接参数
+            /// </summary>
+            JsonPara
+        };
+
+        /// <summary>
         /// http客户端
         /// </summary>
         protected HttpClient client;
 
         /// <summary>
+        /// http客户端状态标识
+        /// </summary>
+        protected bool[] openFlag;
+
+        /// <summary>
         /// 初始化
         /// </summary>
         /// <param name="client">http长连接客户端</param>
-        public HttpStub(HttpClient client)
+        /// <param name="isOpen">http客户端状态标识</param>
+        public HttpStub(HttpClient client, bool[] isOpen)
         {
             this.client = client;
+            openFlag = isOpen;
         }
 
         /// <summary>
@@ -46,9 +72,9 @@ namespace BitAuto.Ucar.Utils.Common.Service.Stub
         /// </summary>
         /// <param name="obj">对象</param>
         /// <returns>键值对有序字典</returns>
-        protected List<KeyValuePair<string, string>> ObjToStrParas(object obj)
+        protected IEnumerable<KeyValuePair<string, string>> ObjToStrParas(object obj)
         {
-            var retParas = new List<KeyValuePair<string, string>>();
+            var retParas = new Dictionary<string, string>();
             if (obj == null)
             {
                 return retParas;
@@ -63,7 +89,7 @@ namespace BitAuto.Ucar.Utils.Common.Service.Stub
                 var filedValue = field.GetValue(obj);
                 if (filedValue != null)
                 {
-                    retParas.Add(new KeyValuePair<string, string>(field.Name, filedValue.ToString()));
+                    retParas.Add(field.Name, filedValue.ToString());
                 }
             }
 
@@ -73,7 +99,7 @@ namespace BitAuto.Ucar.Utils.Common.Service.Stub
                 var propertyValue = property.GetValue(obj);
                 if (propertyValue != null)
                 {
-                    retParas.Add(new KeyValuePair<string, string>(property.Name, propertyValue.ToString()));
+                    retParas.Add(property.Name, propertyValue.ToString());
                 }
             }
 
@@ -90,26 +116,36 @@ namespace BitAuto.Ucar.Utils.Common.Service.Stub
         /// <param name="reqObj">请求POCO实例</param>
         /// <param name="paraInForm">请求参数是否为form形式，否则合并至Url</param>
         /// <returns>响应POCO实例</returns>
-        public async Task<V> PostJson<U, V>(string relatedUrl, U reqObj, bool paraInForm = true)
+        public async Task<V> PostJson<U, V>(string relatedUrl, U reqObj, ParaMode paraMode = ParaMode.UrlPara)
         {
             this.Headers.Accept.TryParseAdd("application/json");
             var paras = ObjToStrParas(reqObj);
-            FormUrlEncodedContent content;
-            if (paraInForm)
+            HttpContent content;
+            switch (paraMode)
             {
-                content = new FormUrlEncodedContent(paras);
-            }
-            else
-            {
-                var paraStr = relatedUrl.Contains('?') ? "&" : "?" +
+                case ParaMode.UrlPara:
+                    var paraStr = relatedUrl.Contains('?') ? "&" : "?" +
                     string.Join("&", paras.Select(para => para.Key + "=" + HttpUtility.UrlEncode(para.Value)));
-                relatedUrl += paraStr;
-                content = new FormUrlEncodedContent(new List<KeyValuePair<string, string>>());
+                    relatedUrl += paraStr;
+                    content = new FormUrlEncodedContent(new List<KeyValuePair<string, string>>());
+                    break;
+                case ParaMode.FormPara:
+                    content = new FormUrlEncodedContent(paras);
+                    break;
+                default:
+                    content = new StringContent(JsonConvert.SerializeObject(reqObj));
+                    break;
             }
-
-
-            var response = await client.PostAsync(relatedUrl, content).ConfigureAwait(false);
-            return JsonConvert.DeserializeObject<V>(response.Content.ReadAsStringAsync().Result);
+            try
+            {
+                var response = await client.PostAsync(relatedUrl, content).ConfigureAwait(false);
+                return JsonConvert.DeserializeObject<V>(response.Content.ReadAsStringAsync().Result);
+            }
+            catch
+            {
+                openFlag[0] = false;
+                throw;
+            }
         }
 
         /// <summary>
@@ -120,8 +156,37 @@ namespace BitAuto.Ucar.Utils.Common.Service.Stub
         /// <returns>响应字符串</returns>
         public async Task<string> Post(string relatedUrl, IEnumerable<KeyValuePair<string, string>> formParas)
         {
-            var response = await client.PostAsync(relatedUrl, new FormUrlEncodedContent(formParas)).ConfigureAwait(false);
-            return response.Content.ReadAsStringAsync().Result;
+            try
+            {
+                var response = await client.PostAsync(relatedUrl, new FormUrlEncodedContent(formParas)).ConfigureAwait(false);
+                return response.Content.ReadAsStringAsync().Result;
+            }
+            catch
+            {
+                openFlag[0] = false;
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Post请求字符串数据
+        /// </summary>
+        /// <param name="relatedUrl">相对url，可含参数</param>
+        /// <param name="strContent">字符串内容</param>
+        /// <param name="encode">编码</param>
+        /// <returns>响应字符串</returns>
+        public async Task<string> Post(string relatedUrl, string strContent, Encoding encode)
+        {
+            try
+            {
+                var response = await client.PostAsync(relatedUrl, new StringContent(strContent, encode)).ConfigureAwait(false);
+                return response.Content.ReadAsStringAsync().Result;
+            }
+            catch
+            {
+                openFlag[0] = false;
+                throw;
+            }
         }
 
         /// <summary>
@@ -137,13 +202,21 @@ namespace BitAuto.Ucar.Utils.Common.Service.Stub
             this.Headers.Accept.TryParseAdd("application/json");
             var paras = ObjToStrParas(reqObj);
             var paraStr = string.Empty;
-            if (paras.Count > 0)
+            if (paras.Count() > 0)
             {
                 paraStr = relatedUrl.Contains('?') ? "&" : "?" +
                 string.Join("&", paras.Select(para => para.Key + "=" + HttpUtility.UrlEncode(para.Value)));
             }
-            var response = await client.GetAsync(relatedUrl + paraStr).ConfigureAwait(false);
-            return JsonConvert.DeserializeObject<V>(response.Content.ReadAsStringAsync().Result);
+            try
+            {
+                var response = await client.GetAsync(relatedUrl + paraStr).ConfigureAwait(false);
+                return JsonConvert.DeserializeObject<V>(response.Content.ReadAsStringAsync().Result);
+            }
+            catch
+            {
+                openFlag[0] = false;
+                throw;
+            }
         }
 
         /// <summary>
@@ -153,8 +226,16 @@ namespace BitAuto.Ucar.Utils.Common.Service.Stub
         /// <returns>响应字符串</returns>
         public async Task<string> Get(string relatedUrl)
         {
-            var response = await client.GetAsync(relatedUrl).ConfigureAwait(false);
-            return response.Content.ReadAsStringAsync().Result;
+            try
+            {
+                var response = await client.GetAsync(relatedUrl).ConfigureAwait(false);
+                return response.Content.ReadAsStringAsync().Result;
+            }
+            catch
+            {
+                openFlag[0] = false;
+                throw;
+            }
         }
     }
 }

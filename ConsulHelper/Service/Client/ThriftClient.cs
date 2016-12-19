@@ -42,7 +42,7 @@ namespace BitAuto.Ucar.Utils.Common.Service.Client
         /// <param name="host">连接主机信息</param>
         /// <param name="owner">连接所有者</param>
         /// <param name="config">连接配置</param>
-        public ThriftClient(string hostInfo, 
+        public ThriftClient(string hostInfo,
                             SerPool owner)
         {
             this.owner = owner;
@@ -67,9 +67,9 @@ namespace BitAuto.Ucar.Utils.Common.Service.Client
         /// <summary>
         /// 连接拥有者
         /// </summary>
-        public SerPool Owner 
+        public SerPool Owner
         {
-            get 
+            get
             {
                 return owner;
             }

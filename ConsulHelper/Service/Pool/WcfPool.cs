@@ -64,7 +64,7 @@ namespace BitAuto.Ucar.Utils.Common.Service.Pool
                 ServiceName = Config["ServiceName"];
                 ChanelType = Type.GetType(Config["ChanelType"]);
                 Protocol = Config.GetStringValue("Protocol", "http://");
-                ServicePath = Config.GetStringValue("ServicePath", ServiceName + ".svc");
+                ServicePath = Config.GetStringValue("ServicePath", "/" + ServiceName + ".svc");
 
                 if (clientsPool == null)
                 {

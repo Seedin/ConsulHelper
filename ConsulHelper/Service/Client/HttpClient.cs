@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using System.Net.Http.Headers;
 using BitAuto.Ucar.Utils.Common.Service;
 
 namespace BitAuto.Ucar.Utils.Common.Service.Client
@@ -34,7 +35,7 @@ namespace BitAuto.Ucar.Utils.Common.Service.Client
         /// <summary>
         /// 开启标志
         /// </summary>
-        protected bool isOpen = false;
+        protected bool[] isOpen = new bool[] { false };
 
         /// <summary>
         /// url基址，包含IP及端口
@@ -47,14 +48,13 @@ namespace BitAuto.Ucar.Utils.Common.Service.Client
         /// <param name="host">连接主机信息</param>
         /// <param name="owner">连接所有者</param>
         /// <param name="config">连接配置</param>
-        public HttpClient(string hostInfo, 
+        public HttpClient(string hostInfo,
                             SerPool owner)
         {
             this.owner = owner;
             this.config = owner.Config;
             this.version = owner.Version;
             this.baseUrl = this.config.GetStringValue("Protocol", "http://")
-                + this.config.GetStringValue("Auth", "")
                 + hostInfo;
             transport = new System.Net.Http.HttpClient()
             {
@@ -70,16 +70,16 @@ namespace BitAuto.Ucar.Utils.Common.Service.Client
         {
             get
             {
-                return isOpen;
+                return isOpen[0];
             }
         }
 
         /// <summary>
         /// 连接拥有者
         /// </summary>
-        public SerPool Owner 
+        public SerPool Owner
         {
-            get 
+            get
             {
                 return owner;
             }
@@ -109,13 +109,16 @@ namespace BitAuto.Ucar.Utils.Common.Service.Client
         /// <returns>是否开启成功</returns>
         public void Open()
         {
-            transport.SendAsync(new System.Net.Http.HttpRequestMessage
+            if (!isOpen[0])
             {
-                Method = new System.Net.Http.HttpMethod("HEAD"),
-                RequestUri = new Uri(this.baseUrl + "/")
-            })
-            .Result.EnsureSuccessStatusCode();
-            isOpen = true;
+                transport.SendAsync(new System.Net.Http.HttpRequestMessage
+                {
+                    Method = new System.Net.Http.HttpMethod("HEAD"),
+                    RequestUri = new Uri(this.baseUrl + "/")
+                })
+                .Result.EnsureSuccessStatusCode();
+                isOpen[0] = true;
+            }
         }
 
         /// <summary>
@@ -124,17 +127,22 @@ namespace BitAuto.Ucar.Utils.Common.Service.Client
         /// <returns>是否关闭成功</returns>
         public void Close()
         {
-            transport.Dispose(); 
+            transport.Dispose();
         }
 
         /// <summary>
         /// 重置，连接归还连接池前操作
         /// </summary>
-        public void Reset() 
+        public void Reset()
         {
             transport.DefaultRequestHeaders.Clear();
             transport.DefaultRequestHeaders.UserAgent.TryParseAdd("Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.93 Safari/537.36");
             transport.DefaultRequestHeaders.Connection.TryParseAdd("Keep-Alive");
+            var auth = this.config.GetStringValue("Auth", "").Split(' ');
+            if (auth.Length == 2)
+            {
+                transport.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(auth[0], auth[1]);
+            }
         }
 
         /// <summary>
@@ -152,7 +160,7 @@ namespace BitAuto.Ucar.Utils.Common.Service.Client
         /// <returns>RPC桩子</returns>
         public T GetStub<T>()
         {
-            return (T)Activator.CreateInstance(typeof(T), transport);
+            return (T)Activator.CreateInstance(typeof(T), transport, isOpen);
         }
         #endregion
     }

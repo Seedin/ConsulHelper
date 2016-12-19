@@ -6,7 +6,7 @@ namespace BitAuto.Ucar.Utils.Common.Service.Pool
 {
     public class HttpPool : SerPool
     {
-                /// <summary>
+        /// <summary>
         /// 构造函数
         /// </summary>
         /// <param name="hosts">服务器地址及端口</param>

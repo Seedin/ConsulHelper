@@ -38,6 +38,11 @@ namespace BitAuto.Ucar.Utils.Common.Consul.Processor
         private const string ServiceTagsKeyFormat = "F:ServcieTags:{0}:{1}:{2}";
 
         /// <summary>
+        /// 服务配置定义键
+        /// </summary>
+        private const string ServiceConfigKeyFormat = "F:Config:{0}:{1}";
+
+        /// <summary>
         /// 同步线程
         /// </summary>
         private void SyncProcess()
@@ -47,11 +52,11 @@ namespace BitAuto.Ucar.Utils.Common.Consul.Processor
                 //同步间隔
                 Thread.Sleep(TimeSpan.FromSeconds(refreshBreak));
 
-                //同步服务信息
-                SyncServices();
-
                 //同步键值
                 SyncKeyValues();
+
+                //同步服务信息
+                SyncServices();
             }
         }
 
@@ -194,13 +199,13 @@ namespace BitAuto.Ucar.Utils.Common.Consul.Processor
                         ConsulLoader.SetKeyValue(serviceTagKey, serviceConfig.ServiceTags).GetAwaiter().GetResult();
                     }
                 }
-                catch { }                
+                catch { }
                 ConsulCache.Instance.SetKeyValue(new Tuple<string, string>(serviceTagKey, serviceConfig.ServiceTags));
             }
 
             //初次同步依赖服务信息及缓存信息
-            SyncServices();
             SyncKeyValues();
+            SyncServices();
 
             //若不存在HttpCheck且Interval存在时开启心跳线程
             if (string.IsNullOrEmpty(consulConfig.HttpCheck) &&
@@ -222,5 +227,23 @@ namespace BitAuto.Ucar.Utils.Common.Consul.Processor
             return string.Format(ServiceTagsKeyFormat, serviceName, rellyServiceName, Dns.GetHostName());
         }
 
+        /// <summary>
+        /// 获取服务配置键值
+        /// </summary>
+        /// <param name="configName"></param>
+        /// <returns></returns>
+        public string GetServiceConfigKey(string configName)
+        {
+            return string.Format(ServiceConfigKeyFormat, serviceName, configName);
+        }
+
+        /// <summary>
+        /// 获取消费者服务名
+        /// </summary>
+        /// <returns>消费者服务名</returns>
+        public string GetServiceName()
+        {
+            return serviceName;
+        }
     }
 }

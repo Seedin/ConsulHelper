@@ -166,21 +166,20 @@ namespace BitAuto.Ucar.Utils.Common.Consul.Container
             //锁外异步触发回调，避免不确定性
             if (hookServiceNames.Count > 0)
             {
-                new Thread(()=>
+                new Thread(() =>
+                {
+                    foreach (var serviceName in hookServiceNames)
                     {
-                        foreach (var serviceName in hookServiceNames)
+                        if (!serviceHooks.ContainsKey(serviceName))
                         {
-                            if (!serviceHooks.ContainsKey(serviceName))
-                            {
-                                continue;
-                            }
-                            foreach (var callback in serviceHooks[serviceName])
-                            {
-                                callback(serviceName);
-                            }
+                            continue;
                         }
-                    }) 
-                    { IsBackground = true }.Start();
+                        foreach (var callback in serviceHooks[serviceName])
+                        {
+                            callback(serviceName);
+                        }
+                    }
+                }) { IsBackground = true }.Start();
 
             }
 

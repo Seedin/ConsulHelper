@@ -31,7 +31,7 @@ namespace BitAuto.Ucar.Utils.Common
         /// <summary>
         /// 单例构造函数
         /// </summary>
-        private ConsulHelper() 
+        private ConsulHelper()
         {
             processor = new ConsulProcessor();
             processor.Initialize();
@@ -126,7 +126,7 @@ namespace BitAuto.Ucar.Utils.Common
             }
             catch { }
 
-            return value;            
+            return value;
         }
 
         /// <summary>
@@ -225,14 +225,15 @@ namespace BitAuto.Ucar.Utils.Common
             }
 
             //筛选有效协议标签
-            string protocolTag = null; 
+            string protocolTag = null;
             foreach (var tag in protocolTags.Split(','))
             {
-                switch(tag)
+                switch (tag)
                 {
                     case "http":
                     case "thrift":
                     case "wcf":
+                    case "grpc":
                         protocolTag = tag;
                         break;
                     default:
@@ -269,9 +270,9 @@ namespace BitAuto.Ucar.Utils.Common
                             {
                                 var configKey = key.Split(':').Last();
                                 config.Add(configKey, GetKeyValue(key));
-                                
+
                                 //设置键值回调
-                                AddKvHook(key, (k,v) =>
+                                AddKvHook(key, (k, v) =>
                                 {
                                     config[k.Split(':').Last()] = v;
                                 });
@@ -294,6 +295,10 @@ namespace BitAuto.Ucar.Utils.Common
                                 break;
                             case "wcf":
                                 pool = new WcfPool(GetServiceHosts(serviceName, protocolTags),
+                                                    config);
+                                break;
+                            case "grpc":
+                                pool = new GrpcPool(GetServiceHosts(serviceName, protocolTags),
                                                     config);
                                 break;
                             default:
@@ -334,6 +339,35 @@ namespace BitAuto.Ucar.Utils.Common
                 var pool = serverPools[poolKey];
                 return new Tuple<int, int>(pool.IdleCount, pool.ActiveCount);
             }
+        }
+
+        /// <summary>
+        /// 获取当前服务依赖服务标签配置键
+        /// </summary>
+        /// <param name="serviceName">依赖服务名</param>
+        /// <returns>标签配置键</returns>
+        public string GetServiceTagsKey(string serviceName)
+        {
+            return processor.GetServiceTagsKey(serviceName);
+        }
+
+        /// <summary>
+        /// 获取服务配置键（标准前缀格式）
+        /// </summary>
+        /// <param name="configName">配置名，不含前缀</param>
+        /// <returns>服务配置键</returns>
+        public string GetServiceConfigKey(string configName)
+        {
+            return processor.GetServiceConfigKey(configName);
+        }
+
+        /// <summary>
+        /// 获取当前应用配置服务名
+        /// </summary>
+        /// <returns>当前应用配置服务名</returns>
+        public string GetServiceName()
+        {
+            return processor.GetServiceName();
         }
     }
 }

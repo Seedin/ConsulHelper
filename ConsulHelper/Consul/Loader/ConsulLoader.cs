@@ -19,10 +19,10 @@ namespace BitAuto.Ucar.Utils.Common.Consul.Loader
         /// <param name="inerval">心跳间隔，被动心跳（被调用httpcheck）或主动心跳（TTL为间隔两倍）</param>
         /// <param name="httpcheck">被动心跳调用接口，可正常返回Http200即存活</param>
         /// <returns>是否注册成功</returns>
-        public static async Task<bool> RegsterService(string name, 
+        public static async Task<bool> RegsterService(string name,
             string tags,
             int port,
-            int inerval, 
+            int inerval,
             string httpcheck,
             string tcpCheck)
         {
