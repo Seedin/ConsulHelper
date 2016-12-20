@@ -109,15 +109,20 @@ namespace BitAuto.Ucar.Utils.Common.Service.Client
         /// <returns>是否开启成功</returns>
         public void Open()
         {
-            if (!isOpen[0])
+            var task = transport.SendAsync(new System.Net.Http.HttpRequestMessage
             {
-                transport.SendAsync(new System.Net.Http.HttpRequestMessage
-                {
-                    Method = new System.Net.Http.HttpMethod("HEAD"),
-                    RequestUri = new Uri(this.baseUrl + "/")
-                })
-                .Result.EnsureSuccessStatusCode();
+                Method = new System.Net.Http.HttpMethod("HEAD"),
+                RequestUri = new Uri(this.baseUrl + "/")
+            });
+            if (task.Wait(Owner.ClientTimeout / 2))
+            {
+                task.Result.EnsureSuccessStatusCode();
                 isOpen[0] = true;
+            }
+            else
+            {
+                isOpen[0] = false;
+                throw new TimeoutException("连接时间超过" + Owner.ClientTimeout + "毫秒");
             }
         }
 

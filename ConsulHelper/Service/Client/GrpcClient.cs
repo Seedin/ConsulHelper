@@ -41,7 +41,7 @@ namespace BitAuto.Ucar.Utils.Common.Service.Client
         /// <param name="host">连接主机信息</param>
         /// <param name="owner">连接所有者</param>
         /// <param name="config">连接配置</param>
-        public GrpcClient(string hostInfo, 
+        public GrpcClient(string hostInfo,
                             SerPool owner)
         {
             this.owner = owner;
@@ -104,11 +104,13 @@ namespace BitAuto.Ucar.Utils.Common.Service.Client
         /// <returns>是否开启成功</returns>
         public void Open()
         {
-            if (transport.State != ChannelState.Ready &&
-                transport.State != ChannelState.Connecting &&
-                transport.State != ChannelState.Idle)
+            if (transport.State != ChannelState.Ready)
             {
-                transport.ConnectAsync().Wait();
+                transport.ConnectAsync().Wait(Owner.ClientTimeout / 2);
+            }
+            if (transport.State != ChannelState.Ready)
+            {
+                throw new RpcException(Status.DefaultCancelled, "连接失败");
             }
         }
 

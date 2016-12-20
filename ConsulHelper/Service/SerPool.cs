@@ -140,55 +140,66 @@ namespace BitAuto.Ucar.Utils.Common.Service
         /// <returns>连接</returns>
         public virtual ISerClient BorrowClient()
         {
-            lock (locker)
+            if (Monitor.TryEnter(locker, TimeSpan.FromMilliseconds(ClientTimeout)))
             {
-                ISerClient client = null;
-                Exception innerErr = null;
-                var validClient = false;
-                //连接池无空闲连接	
-
-                while (idleCount > 0 && !validClient)
+                try
                 {
-                    client = DequeueClient();
-                    validClient = ValidateClient(client, out innerErr);
+                    ISerClient client = null;
+                    Exception innerErr = null;
+                    var validClient = false;
+                    //连接池无空闲连接	
+
+                    if (idleCount > 0 && !validClient)
+                    {
+                        client = DequeueClient();
+                        validClient = ValidateClient(client, out innerErr);
+                        if (!validClient)
+                        {
+                            DestoryClient(client);
+                        }
+                    }
+
+                    //连接池无空闲连接	
                     if (!validClient)
                     {
-                        DestoryClient(client);
-                    }
-                }
-
-                //连接池无空闲连接	
-                if (idleCount == 0 && !validClient)
-                {
-                    //连接池已已创建连接数达上限				
-                    if (activeCount > MaxActive)
-                    {
-                        if (!resetEvent.WaitOne(ClientTimeout))
+                        //连接池已已创建连接数达上限				
+                        if (activeCount > MaxActive)
                         {
-                            throw new TimeoutException("连接池繁忙，暂无可用连接。");
+                            if (!resetEvent.WaitOne(ClientTimeout))
+                            {
+                                throw new TimeoutException("连接池繁忙，暂无可用连接。");
+                            }
+                        }
+                        else
+                        {
+                            client = InitializeClient(out innerErr);
+                            if (client == null)
+                            {
+                                throw new InvalidOperationException("连接获取失败，请确认调用服务状态。", innerErr);
+                            }
                         }
                     }
-                    else
+
+                    //空闲连接数小于最小空闲数，添加一个连接到连接池（已创建数不能超标）			
+                    if (idleCount < MinIdle && activeCount < MaxActive)
                     {
-                        client = InitializeClient(out innerErr);
-                        if (client == null)
+                        var candiate = InitializeClient(out innerErr);
+                        if (candiate != null)
                         {
-                            throw new InvalidOperationException("连接获取失败，请确认调用服务状态。", innerErr);
+                            EnqueueClient(candiate);
                         }
                     }
-                }
 
-                //空闲连接数小于最小空闲数，添加一个连接到连接池（已创建数不能超标）			
-                if (idleCount < MinIdle && activeCount < MaxActive)
+                    return client;
+                }
+                finally
                 {
-                    var candiate = InitializeClient(out innerErr);
-                    if (candiate != null)
-                    {
-                        EnqueueClient(candiate);
-                    }
+                    Monitor.Exit(locker);
                 }
-
-                return client;
+            }
+            else
+            {
+                throw new TimeoutException("获取连接等待超过" + ClientTimeout + "毫秒。");
             }
         }
 

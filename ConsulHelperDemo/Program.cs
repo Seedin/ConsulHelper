@@ -13,7 +13,7 @@ namespace ConsulHelperDemo
     {
         static void Main(string[] args)
         {
-            //KibanaHttpConcurrentTest();
+            KibanaHttpConcurrentTest();
             //ESThriftConcurrentTest();
             //WcfDemoConcurrentTest();
             //ESGrpcConcurrentTest();
