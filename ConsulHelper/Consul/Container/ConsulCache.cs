@@ -56,6 +56,11 @@ namespace BitAuto.Ucar.Utils.Common.Consul.Container
         private Dictionary<string, string> serviceTags = new Dictionary<string, string>();
 
         /// <summary>
+        /// 回调监视标签快照
+        /// </summary>
+        private Dictionary<string, List<string>> hookedServiceTags = new Dictionary<string, List<string>>();
+
+        /// <summary>
         /// 服务信息
         /// </summary>
         private Dictionary<string, ServiceEntry[]> serviceInfos = new Dictionary<string, ServiceEntry[]>();
@@ -142,22 +147,40 @@ namespace BitAuto.Ucar.Utils.Common.Consul.Container
                     var typeServices = services
                         .Where(service => service.Service.Service == serviceName)
                         .ToArray();
+                    var serviceTags = GetServiceTags(serviceName).Split(',');
                     if (serviceInfos.ContainsKey(serviceName))
                     {
                         var lastServices = serviceInfos[serviceName];
-                        //值更新时确认是否发生变动，变动时触发钩子并更新值
+                        //值更新时确认是否发生变动，变动时更新缓存服务
                         if (lastServices.Length != typeServices.Length ||
                             lastServices.Sum(HashScore) !=
                             typeServices.Sum(HashScore)
                             )
                         {
                             serviceInfos[serviceName] = typeServices;
-                            hookServiceNames.Add(serviceName);
+                            //检查是否需要触发回调，选定标签的服务集合发生变动时触发回调
+
+                            //变更前可用服务清单
+                            var lastTagSers = GetTagsFilteredServices(lastServices, hookedServiceTags[serviceName]);
+                            //变更后可用服务清单
+                            var nextTagSers = GetTagsFilteredServices(typeServices, serviceTags);
+                            //指定标签服务发生变动，添加回调标记
+                            if (lastTagSers.Count != nextTagSers.Count ||
+                                lastTagSers.Sum(HashScore) !=
+                            nextTagSers.Sum(HashScore))
+                            {
+                                hookServiceNames.Add(serviceName);
+                            }
+                            //更新标签快照
+                            hookedServiceTags[serviceName].Clear();
+                            hookedServiceTags[serviceName].AddRange(serviceTags);
                         }
                     }
                     else
                     {
                         serviceInfos.Add(serviceName, typeServices);
+                        hookedServiceTags.Add(serviceName, new List<string>());
+                        hookedServiceTags[serviceName].AddRange(serviceTags);
                     }
                     setCount += typeServices.Length;
                 }
@@ -198,20 +221,7 @@ namespace BitAuto.Ucar.Utils.Common.Consul.Container
             {
                 return new string[0];
             }
-            var services = new List<ServiceEntry>(serviceInfos[serviceName]);
-            foreach (var tag in serviceTags.Split(','))
-            {
-                //仅匹配交集
-                if (string.IsNullOrEmpty(tag))
-                {
-                    continue;
-                }
-                var alsorans = services.Where(service => !service.Service.Tags.Contains(tag)).ToList();
-                foreach (var alsoran in alsorans)
-                {
-                    services.Remove(alsoran);
-                }
-            }
+            var services = GetTagsFilteredServices(serviceInfos[serviceName], serviceTags.Split(','));
             return services.Select(service => service.Node.Address + ":" + service.Service.Port).ToArray();
         }
 
@@ -381,6 +391,33 @@ namespace BitAuto.Ucar.Utils.Common.Consul.Container
                     kvHooks[key].Clear();
                 }
             }
+        }
+
+        /// <summary>
+        /// 获取被标签过滤后的服务
+        /// </summary>
+        /// <param name="services">原始服务清单</param>
+        /// <param name="tags">标签</param>
+        /// <returns>标签过滤服务</returns>
+        public List<ServiceEntry> GetTagsFilteredServices(
+            IEnumerable<ServiceEntry> services,
+            IEnumerable<string> tags)
+        {
+            var tagServices = new List<ServiceEntry>(services);
+            foreach (var tag in tags)
+            {
+                //仅匹配交集
+                if (string.IsNullOrEmpty(tag))
+                {
+                    continue;
+                }
+                var alsorans = tagServices.Where(service => !service.Service.Tags.Contains(tag)).ToList();
+                foreach (var alsoran in alsorans)
+                {
+                    tagServices.Remove(alsoran);
+                }
+            }
+            return tagServices;
         }
     }
 }
