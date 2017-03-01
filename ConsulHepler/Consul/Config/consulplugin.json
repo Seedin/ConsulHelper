@@ -1,0 +1,23 @@
+﻿{
+  "ServiceName": "ConsulHelperDemo",
+  "ServiceTags": "first,second",
+  "ServicePort": "80",
+  "HeartBreak": "15",
+  "RefreshBreak": "15",
+  "HttpCheck": "",
+  "TcpCheck": "",
+  "Services": [
+    {
+      "Name": "kibana",
+      "ServiceTags": "",
+      "Description": "kibana"
+    }
+  ],
+  "KeyValues": [
+    {
+      "Name": "F:Config:ConsulHelperDemo:test",
+      "Value": "test",
+      "Description": "test"
+    }
+  ]
+}

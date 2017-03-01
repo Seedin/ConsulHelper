@@ -1,0 +1,143 @@
+﻿{
+  "ServiceName": "ConsulHelperDemo",
+  "ServiceTags": "first,second",
+  "ServicePort": "0",
+  "HeartBreak": "15",
+  "RefreshBreak": "15",
+  "HttpCheck": "",
+  "TcpCheck": "",
+  "Services": [
+    {
+      "Name": "kibana",
+      "ServiceTags": "http",
+      "Description": "kibana"
+    },
+    {
+      "Name": "esgrpc",
+      "ServiceTags": "grpc",
+      "Description": "esgrpc"
+    },
+    {
+      "Name": "esthrift",
+      "ServiceTags": "thrift",
+      "Description": "esthrift"
+    },
+    {
+      "Name": "wcfdemo",
+      "ServiceTags": "wcf",
+      "Description": "wcfdemo"
+    }
+  ],
+  "KeyValues": [
+    {
+      "Name": "F:Config:ConsulHelperDemo:test",
+      "Value": "test",
+      "Description": "test"
+    },
+    {
+      "Name": "F:Config:ConsulHelperDemo:esgrpc:grpc:MaxActive",
+      "Value": "100",
+      "Description": "esgrpc"
+    },
+    {
+      "Name": "F:Config:ConsulHelperDemo:esgrpc:grpc:MinIdle",
+      "Value": "2",
+      "Description": "esgrpc"
+    },
+    {
+      "Name": "F:Config:ConsulHelperDemo:esgrpc:grpc:MaxIdle",
+      "Value": "10",
+      "Description": "esgrpc"
+    },
+    {
+      "Name": "F:Config:ConsulHelperDemo:esgrpc:grpc:ClientTimeout",
+      "Value": "5000",
+      "Description": "esgrpc"
+    },
+    {
+      "Name": "F:Config:ConsulHelperDemo:esthrift:thrift:MaxActive",
+      "Value": "100",
+      "Description": "esthrift"
+    },
+    {
+      "Name": "F:Config:ConsulHelperDemo:esthrift:thrift:MinIdle",
+      "Value": "2",
+      "Description": "esthrift"
+    },
+    {
+      "Name": "F:Config:ConsulHelperDemo:esthrift:thrift:MaxIdle",
+      "Value": "10",
+      "Description": "esthrift"
+    },
+    {
+      "Name": "F:Config:ConsulHelperDemo:esthrift:thrift:ClientTimeout",
+      "Value": "5000",
+      "Description": "esthrift"
+    },
+    {
+      "Name": "F:Config:ConsulHelperDemo:kibana:http:Protocol",
+      "Value": "http://",
+      "Description": "kibanahttp"
+    },
+    {
+      "Name": "F:Config:ConsulHelperDemo:kibana:http:Auth",
+      "Value": "",
+      "Description": "kibanahttp"
+    },
+    {
+      "Name": "F:Config:ConsulHelperDemo:kibana:http:MaxActive",
+      "Value": "100",
+      "Description": "kibanahttp"
+    },
+    {
+      "Name": "F:Config:ConsulHelperDemo:kibana:http:MinIdle",
+      "Value": "2",
+      "Description": "kibanahttp"
+    },
+    {
+      "Name": "F:Config:ConsulHelperDemo:kibana:http:MaxIdle",
+      "Value": "10",
+      "Description": "kibanahttp"
+    },
+    {
+      "Name": "F:Config:ConsulHelperDemo:kibana:http:ClientTimeout",
+      "Value": "5000",
+      "Description": "kibanahttp"
+    },
+    {
+      "Name": "F:Config:ConsulHelperDemo:wcfdemo:wcf:Protocol",
+      "Value": "http://",
+      "Description": "wcfdemo"
+    },
+    {
+      "Name": "F:Config:ConsulHelperDemo:wcfdemo:wcf:ServicePath",
+      "Value": "/DemoService.svc",
+      "Description": "wcfdemo"
+    },
+    {
+      "Name": "F:Config:ConsulHelperDemo:wcfdemo:wcf:ChanelType",
+      "Value": "IDemoService,ConsulHelperDemo",
+      "Description": "wcfdemo"
+    },
+    {
+      "Name": "F:Config:ConsulHelperDemo:wcfdemo:wcf:MaxActive",
+      "Value": "100",
+      "Description": "wcfdemo"
+    },
+    {
+      "Name": "F:Config:ConsulHelperDemo:wcfdemo:wcf:MinIdle",
+      "Value": "2",
+      "Description": "wcfdemo"
+    },
+    {
+      "Name": "F:Config:ConsulHelperDemo:wcfdemo:wcf:MaxIdle",
+      "Value": "10",
+      "Description": "wcfdemo"
+    },
+    {
+      "Name": "F:Config:ConsulHelperDemo:wcfdemo:wcf:ClientTimeout",
+      "Value": "5000",
+      "Description": "wcfdemo"
+    }
+  ]
+}

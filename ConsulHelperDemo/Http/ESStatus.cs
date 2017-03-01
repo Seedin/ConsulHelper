@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 namespace ConsulHelperDemo.Http
 {
     public class ESStatus
