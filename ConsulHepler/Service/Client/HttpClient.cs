@@ -56,7 +56,8 @@ namespace BitAuto.Ucar.Utils.Common.Service.Client
                 + hostInfo;
             transport = new System.Net.Http.HttpClient()
             {
-                BaseAddress = new Uri(baseUrl)
+                BaseAddress = new Uri(baseUrl),
+                Timeout = TimeSpan.FromMilliseconds(owner.Config.GetIntValue("ClientTimeout", 5000))
             };
         }
 

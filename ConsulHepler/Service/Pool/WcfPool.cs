@@ -133,6 +133,8 @@ namespace BitAuto.Ucar.Utils.Common.Service.Pool
                         binding = new BasicHttpBinding();
                         break;
                 }
+                binding.SendTimeout = TimeSpan.FromMilliseconds(ClientTimeout);
+                binding.ReceiveTimeout = TimeSpan.FromMilliseconds(ClientTimeout);
                 var factory = typeof(ChannelFactory<>)
                     .MakeGenericType(ChanelType)
                     .GetConstructor(new Type[] { typeof(Binding), typeof(EndpointAddress) })

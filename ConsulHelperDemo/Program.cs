@@ -217,7 +217,8 @@ namespace ConsulHelperDemo
                             using (var client = ConsulHelper.Instance.GetServiceClient("esgrpc"))
                             {
                                 var stub = client.GetStub<TaocheES.TaocheESService.TaocheESServiceClient>();
-                                var ret = stub.SearchTaocheCar(param);
+                                var callOptions = new Grpc.Core.CallOptions().WithDeadline(DateTime.UtcNow.AddMilliseconds(5000));
+                                var ret = stub.SearchTaocheCar(param, callOptions);
                                 if (ret.Count <= 0)
                                 {
                                     Console.WriteLine(Thread.CurrentThread.ManagedThreadId + ":" + ret.Count);

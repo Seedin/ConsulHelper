@@ -47,7 +47,10 @@ namespace BitAuto.Ucar.Utils.Common.Service.Client
             this.config = owner.Config;
             this.version = owner.Version;
             transport = new TSocket(hostInfo.Split(':')[0],
-                                    int.Parse(hostInfo.Split(':')[1]));
+                                    int.Parse(hostInfo.Split(':')[1]))
+            {
+                Timeout = owner.Config.GetIntValue("ClientTimeout", 5000)
+            }; ;
         }
 
         #region 属性
