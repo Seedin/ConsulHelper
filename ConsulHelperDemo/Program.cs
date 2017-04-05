@@ -18,7 +18,7 @@ namespace ConsulHelperDemo
             if (string.IsNullOrEmpty(mode))
             {
                 Console.WriteLine("请输入rpc名称，对应Demo如下");
-                Console.WriteLine("http:KibanaHttp;");
+                Console.WriteLine("http:HttpDemo;");
                 Console.WriteLine("thrift:ESThrift;");
                 Console.WriteLine("grpc:ESGrpc;");
                 Console.WriteLine("wcf:WcfDemo;");
@@ -27,7 +27,7 @@ namespace ConsulHelperDemo
             switch (mode)
             {
                 case "http":
-                    KibanaHttpConcurrentTest();
+                    HttpDemoConcurrentTest();
                     break;
                 case "thrift":
                     ESThriftConcurrentTest();
@@ -44,7 +44,7 @@ namespace ConsulHelperDemo
             }
         }
 
-        static void KibanaHttpConcurrentTest()
+        static void HttpDemoConcurrentTest()
         {
             var tasks = new Thread[10];
             for (var i = 0; i < tasks.Length; i++)
@@ -55,15 +55,14 @@ namespace ConsulHelperDemo
                     {
                         try
                         {
-                            using (var client = ConsulHelper.Instance.GetServiceClient("kibana"))
+                            using (var client = ConsulHelper.Instance.GetServiceClient("httpdemo"))
                             {
                                 var stub = client.GetStub<BitAuto.Ucar.Utils.Common.Service.Stub.HttpStub>();
-                                var ret = stub.PostJson<ConsulHelperDemo.Http.ESPara, ConsulHelperDemo.Http.ESSearch>(
-                                    "/elasticsearch/.kibana/index-pattern/_search", new Http.ESPara() { })
-                                    .GetAwaiter().GetResult();
+                                var ret = stub.Get("/api/values").GetAwaiter().GetResult();
                                 if (j % 100 == 0)
                                 {
                                     Console.WriteLine(Thread.CurrentThread.ManagedThreadId + ":" + j);
+                                    Console.WriteLine(ret);
                                 }
                             }
                         }

@@ -1,0 +1,17 @@
+﻿{
+    "ServiceName": "httpdemo",
+    "ServiceTags": "http,test",
+    "ServicePort": "12345",
+    "HeartBreak": "15",
+    "RefreshBreak": "15",
+    "HttpCheck": "http://127.0.0.1:12345/",
+    "TcpCheck": "",
+    "Services": [],
+    "KeyValues": [
+        {
+            "Name": "F:Config:httpdemo:test",
+            "Value": "test",
+            "Description": "test"
+        }
+    ]
+}

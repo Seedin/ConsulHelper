@@ -8,9 +8,9 @@
   "TcpCheck": "",
   "Services": [
     {
-      "Name": "kibana",
-      "ServiceTags": "http",
-      "Description": "kibana"
+        "Name": "httpdemo",
+        "ServiceTags": "http,test",
+        "Description": "httpdemo"
     },
     {
       "Name": "esgrpc",
