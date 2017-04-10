@@ -1,0 +1,17 @@
+﻿{
+    "ServiceName": "thriftdemo",
+    "ServiceTags": "thrift,test",
+    "ServicePort": "9090",
+    "HeartBreak": "15",
+    "RefreshBreak": "15",
+    "HttpCheck": "",
+    "TcpCheck": "",
+    "Services": [],
+    "KeyValues": [
+        {
+            "Name": "F:Config:thriftdemo:test",
+            "Value": "test",
+            "Description": "test"
+        }
+    ]
+}

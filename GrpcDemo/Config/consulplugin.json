@@ -1,0 +1,17 @@
+﻿{
+    "ServiceName": "grpcdemo",
+    "ServiceTags": "grpc,test",
+    "ServicePort": "50051",
+    "HeartBreak": "15",
+    "RefreshBreak": "15",
+    "HttpCheck": "",
+    "TcpCheck": "",
+    "Services": [],
+    "KeyValues": [
+        {
+            "Name": "F:Config:grpcdemo:test",
+            "Value": "test",
+            "Description": "test"
+        }
+    ]
+}

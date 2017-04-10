@@ -36,7 +36,7 @@
       "dependencies": {
         "Microsoft.NETCore.App": {
           "type": "platform",
-          "version": "1.1.0"
+          "version": "1.0.0"
         },
         "System.ServiceModel.Primitives": {
           "version": "4.3.0"
@@ -62,12 +62,12 @@
       }
     },
     "net462": {
-      "frameworkAssemblies": {
-        "System.ServiceModel": "",
-        "System.Net.Http": "",
-        "System.Net.Http.WebRequest": "",
-        "System.Web": ""
-      }
+        "frameworkAssemblies": {
+            "System.ServiceModel": "4.0.0.0",
+            "System.Net.Http": "4.0.0.0",
+            "System.Net.Http.WebRequest": "4.0.0.0",
+            "System.Web": "4.0.0.0"
+        }
     }
   }
 }

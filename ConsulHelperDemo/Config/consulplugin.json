@@ -13,19 +13,19 @@
         "Description": "httpdemo"
     },
     {
-      "Name": "esgrpc",
-      "ServiceTags": "grpc",
-      "Description": "esgrpc"
+        "Name": "grpcdemo",
+        "ServiceTags": "grpc",
+        "Description": "grpcdemo"
     },
     {
-      "Name": "esthrift",
-      "ServiceTags": "thrift",
-      "Description": "esthrift"
+        "Name": "thriftdemo",
+        "ServiceTags": "thrift",
+        "Description": "thriftdemo"
     },
     {
-      "Name": "wcfdemo",
-      "ServiceTags": "wcf",
-      "Description": "wcfdemo"
+        "Name": "wcfdemo",
+        "ServiceTags": "wcf,test",
+        "Description": "wcfdemo"
     }
   ],
   "KeyValues": [
@@ -35,74 +35,74 @@
       "Description": "test"
     },
     {
-      "Name": "F:Config:ConsulHelperDemo:esgrpc:grpc:MaxActive",
+      "Name": "F:Config:ConsulHelperDemo:grpcdemo:grpc:MaxActive",
       "Value": "100",
-      "Description": "esgrpc"
+      "Description": "grpcdemo"
     },
     {
-      "Name": "F:Config:ConsulHelperDemo:esgrpc:grpc:MinIdle",
+      "Name": "F:Config:ConsulHelperDemo:grpcdemo:grpc:MinIdle",
       "Value": "2",
-      "Description": "esgrpc"
+      "Description": "grpcdemo"
     },
     {
-      "Name": "F:Config:ConsulHelperDemo:esgrpc:grpc:MaxIdle",
+      "Name": "F:Config:ConsulHelperDemo:grpcdemo:grpc:MaxIdle",
       "Value": "10",
-      "Description": "esgrpc"
+      "Description": "grpcdemo"
     },
     {
-      "Name": "F:Config:ConsulHelperDemo:esgrpc:grpc:ClientTimeout",
+      "Name": "F:Config:ConsulHelperDemo:grpcdemo:grpc:ClientTimeout",
       "Value": "5000",
-      "Description": "esgrpc"
+      "Description": "grpcdemo"
     },
     {
-      "Name": "F:Config:ConsulHelperDemo:esthrift:thrift:MaxActive",
+      "Name": "F:Config:ConsulHelperDemo:thriftdemo:thrift:MaxActive",
       "Value": "100",
-      "Description": "esthrift"
+      "Description": "thriftdemo"
     },
     {
-      "Name": "F:Config:ConsulHelperDemo:esthrift:thrift:MinIdle",
+      "Name": "F:Config:ConsulHelperDemo:thriftdemo:thrift:MinIdle",
       "Value": "2",
-      "Description": "esthrift"
+      "Description": "thriftdemo"
     },
     {
-      "Name": "F:Config:ConsulHelperDemo:esthrift:thrift:MaxIdle",
+      "Name": "F:Config:ConsulHelperDemo:thriftdemo:thrift:MaxIdle",
       "Value": "10",
-      "Description": "esthrift"
+      "Description": "thriftdemo"
     },
     {
-      "Name": "F:Config:ConsulHelperDemo:esthrift:thrift:ClientTimeout",
+      "Name": "F:Config:ConsulHelperDemo:thriftdemo:thrift:ClientTimeout",
       "Value": "5000",
-      "Description": "esthrift"
+      "Description": "thriftdemo"
     },
     {
-      "Name": "F:Config:ConsulHelperDemo:kibana:http:Protocol",
-      "Value": "http://",
-      "Description": "kibanahttp"
+        "Name": "F:Config:ConsulHelperDemo:httpdemo:http:Protocol",
+        "Value": "http://",
+        "Description": "httpdemo"
     },
     {
-      "Name": "F:Config:ConsulHelperDemo:kibana:http:Auth",
-      "Value": "",
-      "Description": "kibanahttp"
+        "Name": "F:Config:ConsulHelperDemo:httpdemo:http:Auth",
+        "Value": "",
+        "Description": "httpdemo"
     },
     {
-      "Name": "F:Config:ConsulHelperDemo:kibana:http:MaxActive",
-      "Value": "100",
-      "Description": "kibanahttp"
+        "Name": "F:Config:ConsulHelperDemo:httpdemo:http:MaxActive",
+        "Value": "100",
+        "Description": "httpdemo"
     },
     {
-      "Name": "F:Config:ConsulHelperDemo:kibana:http:MinIdle",
-      "Value": "2",
-      "Description": "kibanahttp"
+        "Name": "F:Config:ConsulHelperDemo:httpdemo:http:MinIdle",
+        "Value": "2",
+        "Description": "httpdemo"
     },
     {
-      "Name": "F:Config:ConsulHelperDemo:kibana:http:MaxIdle",
-      "Value": "10",
-      "Description": "kibanahttp"
+        "Name": "F:Config:ConsulHelperDemo:httpdemo:http:MaxIdle",
+        "Value": "10",
+        "Description": "httpdemo"
     },
     {
-      "Name": "F:Config:ConsulHelperDemo:kibana:http:ClientTimeout",
-      "Value": "5000",
-      "Description": "kibanahttp"
+        "Name": "F:Config:ConsulHelperDemo:httpdemo:http:ClientTimeout",
+        "Value": "5000",
+        "Description": "httpdemo"
     },
     {
       "Name": "F:Config:ConsulHelperDemo:wcfdemo:wcf:Protocol",

@@ -1,0 +1,38 @@
+﻿{
+    "version": "1.0.0-*",
+    "buildOptions": {
+        "emitEntryPoint": true,
+        "copyToOutput": {
+            "include": [
+                "Config"
+            ]
+        }
+    },
+    "publishOptions": {
+        "include": [
+            "Config"
+        ]
+    },
+    "dependencies": {
+        "Microsoft.NETCore.App": {
+            "type": "platform",
+            "version": "1.1.0"
+        },
+        "Google.Protobuf": {
+            "version": "3.1.0"
+        },
+        "Grpc.Core": {
+            "version": "1.0.1"
+        },
+        "Grpc": {
+            "version": "1.0.1"
+        },
+        "ConsulHepler": "1.1.0"
+    },
+
+    "frameworks": {
+        "netcoreapp1.1": {
+            "imports": "dnxcore50"
+        }
+    }
+}

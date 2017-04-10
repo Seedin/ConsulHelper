@@ -1,11 +1,11 @@
 ﻿{
-  "ServiceName": "wcfdemo",
-  "ServiceTags": "wcf",
-  "ServicePort": "12582",
-  "HeartBreak": "15",
-  "RefreshBreak": "15",
-  "HttpCheck": "",
-  "TcpCheck": "",
-  "Services": [],
-  "KeyValues": []
+    "ServiceName": "wcfdemo",
+    "ServiceTags": "wcf,test",
+    "ServicePort": "12582",
+    "HeartBreak": "15",
+    "RefreshBreak": "15",
+    "HttpCheck": "",
+    "TcpCheck": "",
+    "Services": [],
+    "KeyValues": []
 }

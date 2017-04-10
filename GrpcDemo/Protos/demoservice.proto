@@ -1,0 +1,19 @@
+﻿syntax = "proto3";
+
+package GrpcDemo;
+
+// The demo service definition.
+service DemoService {
+  // Get the value of a key.
+  rpc GetKeyValue (ServiceKey) returns (ServiceValue) {}
+}
+
+// The key message.
+message ServiceKey {
+  string key = 1;
+}
+
+// The value message
+message ServiceValue {
+  string value = 1;
+}

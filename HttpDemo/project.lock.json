@@ -4011,7 +4011,7 @@
           "Microsoft.Extensions.Configuration": "1.1.0",
           "Microsoft.Extensions.Configuration.Binder": "1.1.0",
           "Microsoft.Extensions.Configuration.Json": "1.1.0",
-          "Microsoft.NETCore.App": "1.1.0",
+          "Microsoft.NETCore.App": "1.0.0",
           "Newtonsoft.Json": "9.0.1",
           "System.Interactive.Async": "3.1.1",
           "System.Net.NameResolution": "4.3.0",

@@ -19,8 +19,8 @@ namespace ConsulHelperDemo
             {
                 Console.WriteLine("请输入rpc名称，对应Demo如下");
                 Console.WriteLine("http:HttpDemo;");
-                Console.WriteLine("thrift:ESThrift;");
-                Console.WriteLine("grpc:ESGrpc;");
+                Console.WriteLine("thrift:ThriftDemo;");
+                Console.WriteLine("grpc:GrpcDemo;");
                 Console.WriteLine("wcf:WcfDemo;");
             }
             mode = Console.ReadLine().ToLower();
@@ -33,7 +33,7 @@ namespace ConsulHelperDemo
                     ESThriftConcurrentTest();
                     break;
                 case "grpc":
-                    ESGrpcConcurrentTest();
+                    GrpcDemoConcurrentTest();
                     break;
                 case "wcf":
                     WcfDemoConcurrentTest();
@@ -82,7 +82,7 @@ namespace ConsulHelperDemo
             do
             {
                 Thread.Sleep(5000);
-                var clientCount = ConsulHelper.Instance.GetServiceClientCount("kibana", "http");
+                var clientCount = ConsulHelper.Instance.GetServiceClientCount("httpdemo", "http");
                 idleCount = clientCount.Item1;
                 activeCount = clientCount.Item2;
                 Console.WriteLine(string.Format("ClientCount<{0},{1}>", idleCount, activeCount));
@@ -102,14 +102,17 @@ namespace ConsulHelperDemo
                     {
                         try
                         {
-                            using (var client = ConsulHelper.Instance.GetServiceClient("esthrift"))
+                            using (var client = ConsulHelper.Instance.GetServiceClient("thriftdemo"))
                             {
-                                var stub = client.GetStub<Taoche.ES.TaocheESService.Client>();
-                                var ret = stub.SearchTaocheCar(new Taoche.ES.DTOSearchCondition()
+                                var stub = client.GetStub<ThriftDemo.DemoService.Client>();
+                                var ret = stub.GetKeyValue(new ThriftDemo.ServiceKey()
                                 {
-                                    RequestSource = 9,
-                                    CommonFlag = 11
+                                    Key = "test"
                                 });
+                                if (string.IsNullOrEmpty(ret.Value))
+                                {
+                                    Console.WriteLine(Thread.CurrentThread.ManagedThreadId + ":" + ret.GetHashCode());
+                                }
                                 if (j % 100 == 0)
                                 {
                                     Console.WriteLine(Thread.CurrentThread.ManagedThreadId + ":" + j);
@@ -132,7 +135,7 @@ namespace ConsulHelperDemo
             do
             {
                 Thread.Sleep(5000);
-                var clientCount = ConsulHelper.Instance.GetServiceClientCount("esthrift", "thrift");
+                var clientCount = ConsulHelper.Instance.GetServiceClientCount("thriftdemo", "thrift");
                 idleCount = clientCount.Item1;
                 activeCount = clientCount.Item2;
                 Console.WriteLine(string.Format("ClientCount<{0},{1}>", idleCount, activeCount));
@@ -192,35 +195,26 @@ namespace ConsulHelperDemo
             Console.ReadLine();
         }
 
-        static void ESGrpcConcurrentTest()
+        static void GrpcDemoConcurrentTest()
         {
             var tasks = new Thread[10];
             for (var i = 0; i < tasks.Length; i++)
             {
                 tasks[i] = new Thread(() =>
                 {
-                    var param = new TaocheES.SearchCondition();
-                    param.RequestSource = 9;
-                    param.PageIndex = 1;
-                    param.PageSize = 200;
-                    param.ReturnFieldArray.Add("ucarid");
-                    param.ReturnFieldArray.Add("userid");
-                    param.ReturnFieldArray.Add("color");
-                    param.ReturnFieldArray.Add("displayprice");
-                    param.ReturnFieldArray.Add("cartitle");
-                    param.CommonFlag = 0;
+                    var key = new GrpcDemo.ServiceKey() { Key = "test"};
                     for (var j = 0; j < 1000; j++)
                     {
                         try
                         {
-                            using (var client = ConsulHelper.Instance.GetServiceClient("esgrpc"))
+                            using (var client = ConsulHelper.Instance.GetServiceClient("grpcdemo"))
                             {
-                                var stub = client.GetStub<TaocheES.TaocheESService.TaocheESServiceClient>();
+                                var stub = client.GetStub<GrpcDemo.DemoService.DemoServiceClient>();
                                 var callOptions = new Grpc.Core.CallOptions().WithDeadline(DateTime.UtcNow.AddMilliseconds(5000));
-                                var ret = stub.SearchTaocheCar(param, callOptions);
-                                if (ret.Count <= 0)
+                                var ret = stub.GetKeyValue(key, callOptions);
+                                if (string.IsNullOrEmpty(ret.Value))
                                 {
-                                    Console.WriteLine(Thread.CurrentThread.ManagedThreadId + ":" + ret.Count);
+                                    Console.WriteLine(Thread.CurrentThread.ManagedThreadId + ":" + ret.GetHashCode());
                                 }
                                 if (j % 100 == 0)
                                 {
@@ -244,7 +238,7 @@ namespace ConsulHelperDemo
             do
             {
                 Thread.Sleep(5000);
-                var clientCount = ConsulHelper.Instance.GetServiceClientCount("esgrpc", "grpc");
+                var clientCount = ConsulHelper.Instance.GetServiceClientCount("grpcdemo", "grpc");
                 idleCount = clientCount.Item1;
                 activeCount = clientCount.Item2;
                 Console.WriteLine(string.Format("ClientCount<{0},{1}>", idleCount, activeCount));
