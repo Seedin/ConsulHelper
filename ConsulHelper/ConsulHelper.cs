@@ -208,6 +208,39 @@ namespace BitAuto.Ucar.Utils.Common
         }
 
         /// <summary>
+        /// 替换服务注册标签，旧标签必须存在，新标签必须有效
+        /// </summary>
+        /// <param name="oldTag">旧标签，如main</param>
+        /// <param name="newTag">新标签，如backup</param>
+        /// <returns>是否替换成功</returns>
+        public bool ReplaceServiceRegisteredTag(string oldTag, string newTag)
+        {
+            var tagStr = processor.GetServiceTags();
+            if (string.IsNullOrEmpty(tagStr) ||
+                string.IsNullOrEmpty(oldTag) ||
+                string.IsNullOrEmpty(newTag))
+            {
+                return false;
+            }
+            var tags = tagStr.Split(',').Select(tag => tag.Trim()).ToArray();
+            var find = Array.FindIndex(tags, tag => tag == oldTag);
+            if (find < 0)
+            {
+                return false;
+            }
+            tags[find] = newTag;
+            try
+            {
+                return ConsulLoader.SetKeyValue(processor.GetRegisterTagKey(), string.Join(",", tags))
+                    .GetAwaiter().GetResult();
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// 获取服务连接
         /// </summary>
         /// <param name="serviceName">服务名</param>

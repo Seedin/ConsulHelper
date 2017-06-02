@@ -4001,7 +4001,7 @@
           "lib/netstandard1.3/Tnidea.Thrift.dll": {}
         }
       },
-      "ConsulHepler/1.1.0": {
+      "ConsulHelper/1.1.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v1.1",
         "dependencies": {
@@ -4011,7 +4011,7 @@
           "Microsoft.Extensions.Configuration": "1.1.0",
           "Microsoft.Extensions.Configuration.Binder": "1.1.0",
           "Microsoft.Extensions.Configuration.Json": "1.1.0",
-          "Microsoft.NETCore.App": "1.0.0",
+          "Microsoft.NETCore.App": "1.1.0",
           "Newtonsoft.Json": "9.0.1",
           "System.Interactive.Async": "3.1.1",
           "System.Net.NameResolution": "4.3.0",
@@ -4023,10 +4023,10 @@
           "Tnidea.Thrift": "0.9.3"
         },
         "compile": {
-          "netcoreapp1.1/ConsulHepler.dll": {}
+          "netcoreapp1.1/ConsulHelper.dll": {}
         },
         "runtime": {
-          "netcoreapp1.1/ConsulHepler.dll": {}
+          "netcoreapp1.1/ConsulHelper.dll": {}
         }
       }
     }
@@ -10640,15 +10640,15 @@
         "lib/netstandard1.3/Tnidea.Thrift.dll"
       ]
     },
-    "ConsulHepler/1.1.0": {
+    "ConsulHelper/1.1.0": {
       "type": "project",
-      "path": "../ConsulHepler/project.json",
-      "msbuildProject": "../ConsulHepler/ConsulHepler.xproj"
+      "path": "../ConsulHelper/project.json",
+      "msbuildProject": "../ConsulHelper/ConsulHelper.xproj"
     }
   },
   "projectFileDependencyGroups": {
     "": [
-      "ConsulHepler >= 1.1.0",
+      "ConsulHelper >= 1.1.0",
       "Microsoft.AspNetCore.Mvc >= 1.1.0",
       "Microsoft.AspNetCore.Routing >= 1.1.0",
       "Microsoft.AspNetCore.Server.IISIntegration >= 1.1.0",

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Http.Headers;
+using BitAuto.Ucar.Utils.Common.Service.Stub;
 
 namespace BitAuto.Ucar.Utils.Common.Service.Client
 {
@@ -165,6 +166,25 @@ namespace BitAuto.Ucar.Utils.Common.Service.Client
         public T GetStub<T>()
         {
             return (T)Activator.CreateInstance(typeof(T), transport, isOpen);
+        }
+
+        /// <summary>
+        /// 获取桩子代理
+        /// </summary>
+        /// <param name="stubType">桩子类型</param>
+        /// <returns>RPC桩子</returns>
+        public object GetStub(Type stubType)
+        {
+            return Activator.CreateInstance(stubType, transport, isOpen);
+        }
+
+        /// <summary>
+        /// 获取通用桩子代理
+        /// </summary>
+        /// <returns>通用桩子代理</returns>
+        public CommonStub GetStub()
+        {
+            return new CommonStub(this);
         }
         #endregion
     }

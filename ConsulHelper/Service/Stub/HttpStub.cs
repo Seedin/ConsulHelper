@@ -18,20 +18,20 @@ namespace BitAuto.Ucar.Utils.Common.Service.Stub
         /// <summary>
         /// 参数类型
         /// </summary>
-        public enum ParaMode
+        public enum ParaMode : int
         {
             /// <summary>
-            /// URL参数
+            /// URL参数:0
             /// </summary>
-            UrlPara,
+            UrlPara = 0,
             /// <summary>
-            /// Form表单参数
+            /// Form表单参数:1
             /// </summary>
-            FormPara,
+            FormPara = 1,
             /// <summary>
-            /// Json直接参数
+            /// Json直接参数:2
             /// </summary>
-            JsonPara
+            JsonPara = 2
         };
 
         /// <summary>
@@ -113,7 +113,7 @@ namespace BitAuto.Ucar.Utils.Common.Service.Stub
         /// <typeparam name="V">响应POCO类型</typeparam>
         /// <param name="relatedUrl">相对url，可含参数</param>
         /// <param name="reqObj">请求POCO实例</param>
-        /// <param name="paraInForm">请求参数是否为form形式，否则合并至Url</param>
+        /// <param name="paraMode">参数模式</param>
         /// <returns>响应POCO实例</returns>
         public async Task<V> PostJson<U, V>(string relatedUrl, U reqObj, ParaMode paraMode = ParaMode.UrlPara)
         {
@@ -139,6 +139,57 @@ namespace BitAuto.Ucar.Utils.Common.Service.Stub
             {
                 var response = await client.PostAsync(relatedUrl, content).ConfigureAwait(false);
                 return JsonConvert.DeserializeObject<V>(response.Content.ReadAsStringAsync().Result);
+            }
+            catch
+            {
+                openFlag[0] = false;
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Post请求Json数据
+        /// </summary>
+        /// <param name="relatedUrl">相对url</param>
+        /// <param name="paraMode">参数模式</param>
+        /// <param name="paras">参数</param>
+        /// <returns>响应字符串</returns>
+        public async Task<string> PostJson(string relatedUrl, ParaMode paraMode, params object[] paras)
+        {
+            this.Headers.Accept.TryParseAdd("application/json");
+            var paraDic = new Dictionary<string, string>();
+            foreach (var para in paras)
+            {
+                var paraPairs = ObjToStrParas(para);
+                foreach (var paraPair in paraPairs)
+                {
+                    if (!paraDic.ContainsKey(paraPair.Key))
+                    {
+                        paraDic.Add(paraPair.Key, paraPair.Value);
+                    }
+                }
+            }
+            HttpContent content;
+            switch (paraMode)
+            {
+                case ParaMode.UrlPara:
+                    var paraStr = relatedUrl.Contains('?') ? "&" : "?" +
+                    string.Join("&", paraDic.Select(para => para.Key + "=" + WebUtility.UrlEncode(para.Value)));
+                    relatedUrl += paraStr;
+                    content = new FormUrlEncodedContent(new List<KeyValuePair<string, string>>());
+                    break;
+                case ParaMode.FormPara:
+                    content = new FormUrlEncodedContent(paraDic);
+                    break;
+                default:
+                    content = new StringContent(JsonConvert.SerializeObject(paraDic));
+                    break;
+            }
+
+            try
+            {
+                var response = await client.PostAsync(relatedUrl, content).ConfigureAwait(false);
+                return response.Content.ReadAsStringAsync().Result;
             }
             catch
             {
@@ -228,6 +279,46 @@ namespace BitAuto.Ucar.Utils.Common.Service.Stub
             try
             {
                 var response = await client.GetAsync(relatedUrl).ConfigureAwait(false);
+                return response.Content.ReadAsStringAsync().Result;
+            }
+            catch
+            {
+                openFlag[0] = false;
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// 获取Json响应字符串
+        /// </summary>
+        /// <param name="relatedUrl">相对url</param>
+        /// <param name="paras">参数</param>
+        /// <returns>响应字符串</returns>
+        public async Task<string> GetJson(string relatedUrl, params object[] paras)
+        {
+            this.Headers.Accept.TryParseAdd("application/json");
+            var paraDic = new Dictionary<string, string>();
+            foreach (var para in paras)
+            {
+                var paraPairs = ObjToStrParas(para);
+                foreach (var paraPair in paraPairs)
+                {
+                    if (!paraDic.ContainsKey(paraPair.Key))
+                    {
+                        paraDic.Add(paraPair.Key, paraPair.Value);
+                    }
+                }
+            }
+
+            var paraStr = string.Empty;
+            if (paraDic.Count() > 0)
+            {
+                paraStr = relatedUrl.Contains('?') ? "&" : "?" +
+                string.Join("&", paraDic.Select(para => para.Key + "=" + WebUtility.UrlEncode(para.Value)));
+            }
+            try
+            {
+                var response = await client.GetAsync(relatedUrl + paraStr).ConfigureAwait(false);
                 return response.Content.ReadAsStringAsync().Result;
             }
             catch

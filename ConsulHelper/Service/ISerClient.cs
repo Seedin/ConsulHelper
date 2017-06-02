@@ -1,4 +1,5 @@
 ﻿using System;
+using BitAuto.Ucar.Utils.Common.Service.Stub;
 
 namespace BitAuto.Ucar.Utils.Common.Service
 {
@@ -40,11 +41,24 @@ namespace BitAuto.Ucar.Utils.Common.Service
         void Reset();
 
         /// <summary>
-        /// 获取桩子类型
+        /// 获取桩子代理
         /// </summary>
         /// <typeparam name="T">桩子类型</typeparam>
         /// <returns>RPC桩子</returns>
         T GetStub<T>();
+
+        /// <summary>
+        /// 获取桩子代理
+        /// </summary>
+        /// <param name="stubType">桩子类型</param>
+        /// <returns>RPC桩子</returns>
+        object GetStub(Type stubType);
+
+        /// <summary>
+        /// 获取通用桩子代理
+        /// </summary>
+        /// <returns>通用桩子代理</returns>
+        CommonStub GetStub();
         #endregion
     }
 }

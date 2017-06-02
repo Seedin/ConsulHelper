@@ -57,8 +57,10 @@ namespace ConsulHelperDemo
                         {
                             using (var client = ConsulHelper.Instance.GetServiceClient("httpdemo"))
                             {
-                                var stub = client.GetStub<BitAuto.Ucar.Utils.Common.Service.Stub.HttpStub>();
-                                var ret = stub.Get("/api/values").GetAwaiter().GetResult();
+                                //var stub = client.GetStub<BitAuto.Ucar.Utils.Common.Service.Stub.HttpStub>();
+                                //var ret = stub.Get("/api/values").GetAwaiter().GetResult();
+                                var stub = client.GetStub();
+                                var ret = stub.Post("/api/values").ToString();
                                 if (j % 100 == 0)
                                 {
                                     Console.WriteLine(Thread.CurrentThread.ManagedThreadId + ":" + j);
@@ -104,8 +106,13 @@ namespace ConsulHelperDemo
                         {
                             using (var client = ConsulHelper.Instance.GetServiceClient("thriftdemo"))
                             {
-                                var stub = client.GetStub<ThriftDemo.DemoService.Client>();
-                                var ret = stub.GetKeyValue(new ThriftDemo.ServiceKey()
+                                //var stub = client.GetStub<ThriftDemo.DemoService.Client>();
+                                //var ret = stub.GetKeyValue(new ThriftDemo.ServiceKey()
+                                //{
+                                //    Key = "test"
+                                //});
+                                var stub = client.GetStub();
+                                var ret = stub.Get<ThriftDemo.ServiceValue>("/GetKeyValue", new ThriftDemo.ServiceKey()
                                 {
                                     Key = "test"
                                 });
@@ -158,8 +165,10 @@ namespace ConsulHelperDemo
                         {
                             using (var client = ConsulHelper.Instance.GetServiceClient("wcfdemo"))
                             {
-                                var stub = client.GetStub<IDemoService>();
-                                var ret = stub.GetDataAsync(10086).GetAwaiter().GetResult();
+                                //var stub = client.GetStub<IDemoService>();
+                                //var ret = stub.GetDataAsync(10086).GetAwaiter().GetResult();
+                                var stub = client.GetStub();
+                                var ret = stub.Get("/GetData", 10086).ToString();
                                 if (string.IsNullOrEmpty(ret))
                                 {
                                     Console.WriteLine(Thread.CurrentThread.ManagedThreadId + ":" + string.Empty);
@@ -209,9 +218,11 @@ namespace ConsulHelperDemo
                         {
                             using (var client = ConsulHelper.Instance.GetServiceClient("grpcdemo"))
                             {
-                                var stub = client.GetStub<GrpcDemo.DemoService.DemoServiceClient>();
-                                var callOptions = new Grpc.Core.CallOptions().WithDeadline(DateTime.UtcNow.AddMilliseconds(5000));
-                                var ret = stub.GetKeyValue(key, callOptions);
+                                //var stub = client.GetStub<GrpcDemo.DemoService.DemoServiceClient>();
+                                //var callOptions = new Grpc.Core.CallOptions().WithDeadline(DateTime.UtcNow.AddMilliseconds(5000));
+                                //var ret = stub.GetKeyValue(key, callOptions);
+                                var stub = client.GetStub();
+                                var ret = stub.Get<GrpcDemo.ServiceValue>("/GetKeyValue", key);
                                 if (string.IsNullOrEmpty(ret.Value))
                                 {
                                     Console.WriteLine(Thread.CurrentThread.ManagedThreadId + ":" + ret.GetHashCode());

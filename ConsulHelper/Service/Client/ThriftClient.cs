@@ -1,18 +1,19 @@
 ﻿using System;
-using System.Reflection;
-using System.ServiceModel;
+using Thrift.Protocol;
+using Thrift.Transport;
+using BitAuto.Ucar.Utils.Common.Service.Stub;
 
 namespace BitAuto.Ucar.Utils.Common.Service.Client
 {
     /// <summary>
-    /// WCF客户端
+    /// Thrift客户端
     /// </summary>
-    public class WcfClient : ISerClient
+    public class ThriftClient : ISerClient
     {
         /// <summary>
         /// 传输层
         /// </summary>
-        ICommunicationObject transport;
+        TTransport transport;
 
         /// <summary>
         /// 连接所有者
@@ -40,18 +41,17 @@ namespace BitAuto.Ucar.Utils.Common.Service.Client
         /// <param name="host">连接主机信息</param>
         /// <param name="owner">连接所有者</param>
         /// <param name="config">连接配置</param>
-        public WcfClient(ChannelFactory factory,
+        public ThriftClient(string hostInfo,
                             SerPool owner)
         {
             this.owner = owner;
             this.config = owner.Config;
             this.version = owner.Version;
-            if (factory.State != CommunicationState.Opened)
+            transport = new TSocket(hostInfo.Split(':')[0],
+                                    int.Parse(hostInfo.Split(':')[1]))
             {
-                factory.Open();
-            }
-            transport = factory.GetType().GetMethod("CreateChannel", new Type[] { })
-                .Invoke(factory, null) as ICommunicationObject;
+                Timeout = owner.Config.GetIntValue("ClientTimeout", 5000)
+            }; ;
         }
 
         #region 属性
@@ -62,7 +62,7 @@ namespace BitAuto.Ucar.Utils.Common.Service.Client
         {
             get
             {
-                return transport.State == CommunicationState.Opened;
+                return transport.IsOpen;
             }
         }
 
@@ -101,8 +101,7 @@ namespace BitAuto.Ucar.Utils.Common.Service.Client
         /// <returns>是否开启成功</returns>
         public void Open()
         {
-            if (transport.State != CommunicationState.Opened &&
-                transport.State != CommunicationState.Opening)
+            if (!transport.IsOpen)
             {
                 transport.Open();
             }
@@ -114,15 +113,7 @@ namespace BitAuto.Ucar.Utils.Common.Service.Client
         /// <returns>是否关闭成功</returns>
         public void Close()
         {
-            if (transport.State != CommunicationState.Closed &&
-                transport.State != CommunicationState.Closing)
-            {
-                try
-                {
-                    transport.Close();
-                }
-                catch { }
-            }
+            transport.Close();
         }
 
         /// <summary>
@@ -146,8 +137,28 @@ namespace BitAuto.Ucar.Utils.Common.Service.Client
         /// <returns>RPC桩子</returns>
         public T GetStub<T>()
         {
-            return (T)transport;
+            return (T)Activator.CreateInstance(typeof(T), new TBinaryProtocol(transport));
+        }
+
+        /// <summary>
+        /// 获取桩子代理
+        /// </summary>
+        /// <param name="stubType">桩子类型</param>
+        /// <returns>RPC桩子</returns>
+        public object GetStub(Type stubType)
+        {
+            return Activator.CreateInstance(stubType, new TBinaryProtocol(transport));
+        }
+
+        /// <summary>
+        /// 获取通用桩子代理
+        /// </summary>
+        /// <returns>通用桩子代理</returns>
+        public CommonStub GetStub()
+        {
+            return new CommonStub(this);
         }
         #endregion
+
     }
 }

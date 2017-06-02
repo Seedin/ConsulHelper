@@ -15,6 +15,7 @@ namespace BitAuto.Ucar.Utils.Common.Consul.Processor
     /// </summary>
     public class ConsulProcessor
     {
+        #region 字段
         /// <summary>
         /// 服务名
         /// </summary>
@@ -31,14 +32,42 @@ namespace BitAuto.Ucar.Utils.Common.Consul.Processor
         private int heartBreak;
 
         /// <summary>
+        /// 服务标签
+        /// </summary>
+        private string serviceTags;
+
+        /// <summary>
+        /// 服务端口
+        /// </summary>
+        private int servicePort;
+
+        /// <summary>
+        /// HTTP心跳检查路径
+        /// </summary>
+        private string httpCheck;
+
+        /// <summary>
+        /// TCP心跳检查路径
+        /// </summary>
+        private string tcpCheck;
+        #endregion 字段
+
+        #region 常量
+        /// <summary>
         /// 依赖服务标签定义键
         /// </summary>
         private const string ServiceTagsKeyFormat = "F:ServcieTags:{0}:{1}:{2}";
 
         /// <summary>
+        /// 注册服务标签定义键
+        /// </summary>
+        private const string RegisterTagKeyFormat = "F:RegisterTag:{0}:{1}";
+
+        /// <summary>
         /// 服务配置定义键
         /// </summary>
         private const string ServiceConfigKeyFormat = "F:Config:{0}:{1}";
+        #endregion 常量
 
         /// <summary>
         /// 同步线程
@@ -71,6 +100,25 @@ namespace BitAuto.Ucar.Utils.Common.Consul.Processor
                 //同步
                 HeartBreakService();
             }
+        }
+
+        /// <summary>
+        /// 注册服务
+        /// </summary>
+        /// <returns>是否注册成功</returns>
+        private bool RegsterService()
+        {
+            try
+            {
+                return ConsulLoader.RegsterService(serviceName,
+                    serviceTags,
+                    servicePort,
+                    heartBreak,
+                    httpCheck,
+                    tcpCheck).GetAwaiter().GetResult();
+            }
+            catch { }
+            return false;
         }
 
         /// <summary>
@@ -166,22 +214,49 @@ namespace BitAuto.Ucar.Utils.Common.Consul.Processor
             serviceName = consulConfig.ServiceName;
             refreshBreak = consulConfig.RefreshBreak;
             heartBreak = consulConfig.HeartBreak;
+            serviceTags = consulConfig.ServiceTags;
+            servicePort = consulConfig.ServicePort;
+            httpCheck = consulConfig.HttpCheck;
+            tcpCheck = consulConfig.TcpCheck;
 
-            //注册服务
+
+            //集中控制服务注册标签覆盖
             try
             {
-                ConsulLoader.RegsterService(serviceName,
-                    consulConfig.ServiceTags,
-                    consulConfig.ServicePort,
-                    consulConfig.HeartBreak,
-                    consulConfig.HttpCheck,
-                    consulConfig.TcpCheck).GetAwaiter().GetResult();
+                var remoteServiceTags = ConsulLoader.GetKeyValue(GetRegisterTagKey()).GetAwaiter().GetResult();
+                if (!string.IsNullOrEmpty(remoteServiceTags))
+                {
+                    ConsulCache.Instance.SetKeyValue(new Tuple<string, string>(GetRegisterTagKey(), remoteServiceTags));
+                    serviceTags = remoteServiceTags;
+                }
+                else if (!string.IsNullOrEmpty(serviceTags))
+                {
+                    //注册可控服务标签
+                    ConsulLoader.SetKeyValue(GetRegisterTagKey(), serviceTags).GetAwaiter().GetResult();
+                    ConsulCache.Instance.SetKeyValue(new Tuple<string, string>(GetRegisterTagKey(), serviceTags));
+                }
             }
-            catch { throw; }
+            catch { }
+
+            //注册服务
+            if (RegsterService())
+            {
+                //注册服务标签变更回调
+                ConsulCache.Instance.AddKvHook(GetRegisterTagKey(),
+                    (k, v) =>
+                    {
+                        if (!string.IsNullOrEmpty(v) &&
+                            v != this.serviceTags)
+                        {
+                            this.serviceTags = v;
+                            RegsterService();
+                        }
+                    });
+            }
 
             //若不存在HttpCheck且Interval存在时发送初始心跳
-            if (string.IsNullOrEmpty(consulConfig.HttpCheck) &&
-                string.IsNullOrEmpty(consulConfig.TcpCheck) &&
+            if (string.IsNullOrEmpty(httpCheck) &&
+                string.IsNullOrEmpty(tcpCheck) &&
                 heartBreak > 0)
             {
                 HeartBreakService();
@@ -221,8 +296,8 @@ namespace BitAuto.Ucar.Utils.Common.Consul.Processor
             SyncServices();
 
             //若不存在HttpCheck且Interval存在时开启心跳线程
-            if (string.IsNullOrEmpty(consulConfig.HttpCheck) &&
-                string.IsNullOrEmpty(consulConfig.TcpCheck) &&
+            if (string.IsNullOrEmpty(httpCheck) &&
+                string.IsNullOrEmpty(tcpCheck) &&
                 heartBreak > 0)
             {
                 new Thread(HeartProcess) { IsBackground = true }.Start();
@@ -235,6 +310,8 @@ namespace BitAuto.Ucar.Utils.Common.Consul.Processor
         /// <summary>
         /// 获取服务标签键值
         /// </summary>
+        /// <param name="rellyServiceName">依赖服务名</param>
+        /// <returns>服务标签键</returns>
         public string GetServiceTagsKey(string rellyServiceName)
         {
             return string.Format(ServiceTagsKeyFormat, serviceName, rellyServiceName, Dns.GetHostName());
@@ -243,11 +320,20 @@ namespace BitAuto.Ucar.Utils.Common.Consul.Processor
         /// <summary>
         /// 获取服务配置键值
         /// </summary>
-        /// <param name="configName"></param>
-        /// <returns></returns>
+        /// <param name="configName">配置名</param>
+        /// <returns>服务配置键</returns>
         public string GetServiceConfigKey(string configName)
         {
             return string.Format(ServiceConfigKeyFormat, serviceName, configName);
+        }
+
+        /// <summary>
+        /// 获取注册标签键值
+        /// </summary>
+        /// <returns>获取注册标签键</returns>
+        public string GetRegisterTagKey()
+        {
+            return string.Format(RegisterTagKeyFormat, serviceName, Dns.GetHostName());
         }
 
         /// <summary>
@@ -257,6 +343,15 @@ namespace BitAuto.Ucar.Utils.Common.Consul.Processor
         public string GetServiceName()
         {
             return serviceName;
+        }
+
+        /// <summary>
+        /// 获取消费者服务标签
+        /// </summary>
+        /// <returns>消费者服务标签</returns>
+        public string GetServiceTags()
+        {
+            return serviceTags;
         }
     }
 }

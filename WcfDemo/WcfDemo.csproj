@@ -68,8 +68,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="ConsulHepler">
-      <HintPath>..\ConsulHepler\bin\Release\net462\ConsulHepler.dll</HintPath>
+    <Reference Include="ConsulHelper">
+      <HintPath>..\ConsulHelper\bin\Release\net462\ConsulHelper.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
